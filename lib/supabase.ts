@@ -1,18 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Ensure environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xglgktmdeoypkjoyfbil.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhnbGdrdG1kZW95cGtqb3lmYmlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNjM4MzQsImV4cCI6MjA3NDgzOTgzNH0.UfTK3LAiUukJAi4JYuK36DPPrLokegeNEQXrPIorvAs';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.error('Missing Supabase environment variables. Please check your .env.local file.');
+  // Create a dummy client for development
+  const dummyClient = {
+    from: () => ({
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ error: null }),
+    }),
+  };
+  // @ts-ignore
+  export const supabase = dummyClient;
+} else {
+  export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false, // Disable Supabase auth
+    },
+  });
 }
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false, // Disable Supabase auth
-  },
-});
 
 // Database types
 export interface Usuario {

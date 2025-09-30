@@ -25,6 +25,11 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<{ success: boolean; user?: Usuario; error?: string }> {
     try {
+      // Check if supabase is properly configured
+      if (!supabase || typeof supabase.from !== 'function') {
+        return { success: false, error: 'Base de datos no configurada. Por favor configura Supabase.' };
+      }
+
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
@@ -47,6 +52,10 @@ export class AuthService {
 
   async register(nombre: string, email: string, password: string, rol: string = 'user'): Promise<{ success: boolean; user?: Usuario; error?: string }> {
     try {
+      if (!supabase || typeof supabase.from !== 'function') {
+        return { success: false, error: 'Base de datos no configurada. Por favor configura Supabase.' };
+      }
+
       const { data, error } = await supabase
         .from('usuarios')
         .insert([{ nombre, email, password, rol }])

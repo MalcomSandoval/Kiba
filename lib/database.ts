@@ -2,19 +2,30 @@ import { supabase } from './supabase';
 import type { Jugador, Categoria, Posicion, Pago, Asistencia, Usuario } from './supabase';
 
 export class DatabaseService {
+  // Helper method to handle database errors
+  private static handleError(error: any, operation: string) {
+    console.error(`Database error in ${operation}:`, error);
+    throw new Error(`Error en ${operation}: ${error.message || 'Error desconocido'}`);
+  }
+
   // Jugadores
   static async getJugadores(): Promise<Jugador[]> {
-    const { data, error } = await supabase
-      .from('jugadores')
-      .select(`
-        *,
-        categoria:categorias(*),
-        posicion:posiciones(*)
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('jugadores')
+        .select(`
+          *,
+          categoria:categorias(*),
+          posicion:posiciones(*)
+        `)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+      if (error) this.handleError(error, 'obtener jugadores');
+      return data || [];
+    } catch (error) {
+      this.handleError(error, 'obtener jugadores');
+      return [];
+    }
   }
 
   static async createJugador(jugador: Omit<Jugador, 'id' | 'created_at'>): Promise<Jugador> {
